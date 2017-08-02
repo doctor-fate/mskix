@@ -8,7 +8,7 @@ import (
 )
 
 type Parser interface {
-	Parse(string) (device.Data, error)
+	Parse([]byte) (device.Data, error)
 }
 
 var parsers sync.Map
@@ -17,7 +17,7 @@ func Register(id device.ID, p Parser) {
 	if p == nil {
 		panic("mskix: Register p is nil")
 	}
-	if _, ok := parsers.LoadOrStore(id, p); !ok {
+	if _, ok := parsers.LoadOrStore(id, p); ok {
 		panic("mskix: Register called twice for device parser " + id)
 	}
 }
@@ -30,7 +30,7 @@ func Parsers() (devices []device.ID) {
 	return
 }
 
-func Parse(id device.ID, data string) (device.Data, error) {
+func Parse(id device.ID, data []byte) (device.Data, error) {
 	v, ok := parsers.Load(id)
 	if !ok {
 		return device.Data{}, fmt.Errorf("mskix: unknown device parser %q (forgotten import?)", id)

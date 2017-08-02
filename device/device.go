@@ -2,11 +2,13 @@ package device
 
 type ID string
 
+type Record struct {
+	Port        string
+	Description string
+	VLAN        string
+}
+
 type Data struct {
 	Id      ID
-	Entries []struct {
-		Port        string
-		Description string
-		VLAN        string
-	}
+	Records []Record
 }
