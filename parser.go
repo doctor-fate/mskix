@@ -30,10 +30,24 @@ func Parsers() (devices []device.ID) {
 	return
 }
 
-func Parse(id device.ID, data []byte) (device.Data, error) {
+func Parse(data []byte) (d device.Data, err error) {
+	parsers.Range(func(k, v interface{}) bool {
+		p := v.(Parser)
+		if d, err = p.Parse(data); err == nil {
+			return false
+		}
+		return true
+	})
+	if err != nil {
+		err = fmt.Errorf("mskix: Parse no suitable parser found")
+	}
+	return
+}
+
+func ParseWithID(id device.ID, data []byte) (device.Data, error) {
 	v, ok := parsers.Load(id)
 	if !ok {
-		return device.Data{}, fmt.Errorf("mskix: unknown device parser %q (forgotten import?)", id)
+		return device.Data{}, fmt.Errorf("mskix: ParseWithID unknown device parser %q (forgotten import?)", id)
 	}
 	p := v.(Parser)
 	return p.Parse(data)
